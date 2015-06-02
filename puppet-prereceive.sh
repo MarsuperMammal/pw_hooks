@@ -2,16 +2,16 @@
 
 failures=0
 RC=0
-
+HOOKDIR='/opt/atlassian/application-data/stash-home/external-hooks'
 if [ $(git rev-parse --is-bare-repository) = true ]
 then
-    REPOSITORY_BASENAME=$(basename "$PWD") 
+    REPOSITORY_BASENAME=$(basename "$PWD")
     REPOSITORY_BASENAME=${REPOSITORY_BASENAME%.git}
 else
     REPOSITORY_BASENAME=$(basename $(readlink -nf "$PWD"/..))
 fi
 
-subhook_root=hooks/commit_hooks
+subhook_root=$HOOKDIR/hooks/commit_hooks
 mktmpdir=`mkdir -p /tmp/$REPOSITORY_BASENAME`
 tmptree="/tmp/$REPOSITORY_BASENAME"
 
@@ -35,7 +35,7 @@ while read oldrev newrev refname; do
 
         #puppet manifest styleguide compliance
         if type puppet-lint >/dev/null 2>&1; then
-            if [ $(echo $changedfile | grep -q '\.*.pp$' ; echo $?) -eq 0 ]; then 
+            if [ $(echo $changedfile | grep -q '\.*.pp$' ; echo $?) -eq 0 ]; then
                 ${subhook_root}/puppet_lint_checks.sh $tmpmodule "${tmptree}/"
                 RC=$?
                 if [ "$RC" -ne 0 ]; then
